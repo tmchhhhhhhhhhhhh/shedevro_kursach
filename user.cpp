@@ -16,8 +16,8 @@ using namespace sql;
 void PrintUserHeader() {
     cout << left
         << setw(6) << "ID"
-        << setw(20) << "Логин"
-        << setw(20) << "Пароль"
+        << setw(20) << "Р›РѕРіРёРЅ"
+        << setw(20) << "РџР°СЂРѕР»СЊ"
         << endl;
     cout << setfill('-') << setw(46) << "" << setfill(' ') << endl;
 }
@@ -28,20 +28,19 @@ void Add_User() {
         Connection* con = db.getConnection();
         string log, pas;
 
-        cout << "\nВведите логин: ";
-        cin >> log;
-        clearInputBuffer();
+        cout << "\nР’РІРµРґРёС‚Рµ Р»РѕРіРёРЅ: ";
+        log = read_utf8_line("");
 
         PreparedStatement* checkStmt = con->prepareStatement("SELECT login FROM users WHERE login = ?");
         checkStmt->setString(1, log);
         ResultSet* result = checkStmt->executeQuery();
 
         if (result->next()) {
-            cout << "Пользователь уже существует. Enter...\n"; cin.get(); system("cls");
+            cout << "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚. Enter...\n"; cin.get(); system("cls");
             delete result; delete checkStmt; return;
         }
 
-        cout << "Введите пароль: ";
+        cout << "Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ: ";
         pas = Get_Password();
 
         PreparedStatement* insertStmt = con->prepareStatement("INSERT INTO users (login, password, access) VALUES (?, ?, ?)");
@@ -50,46 +49,46 @@ void Add_User() {
         insertStmt->setBoolean(3, true);
 
         int affected = insertStmt->executeUpdate();
-        cout << (affected > 0 ? "Пользователь добавлен." : "Не удалось добавить.") << " Enter...\n";
+        cout << (affected > 0 ? "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РґРѕР±Р°РІР»РµРЅ." : "РќРµ СѓРґР°Р»РѕСЃСЊ РґРѕР±Р°РІРёС‚СЊ.") << " Enter...\n";
         cin.get(); system("cls");
 
         delete insertStmt; delete result; delete checkStmt;
     }
     catch (SQLException& e) {
-        cerr << "SQL ошибка: " << e.what() << endl;
+        cerr << "SQL РѕС€РёР±РєР°: " << e.what() << endl;
     }
 }
 
-//Удаление пользователя
+//РЈРґР°Р»РµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 void Delete_User() {
     try {
         Database db;
         Connection* con = db.getConnection();
         string s;
 
-        // Ввод ID пользователя
-        cout << "\nВведите ID пользователя для удаления: ";
+        // Р’РІРѕРґ ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
+        cout << "\nР’РІРµРґРёС‚Рµ ID РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ: ";
         cin >> s;
         clearInputBuffer();
 
-        // Проверка корректности ввода
+        // РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё РІРІРѕРґР°
         if (prov(s) != 1) {
-            cout << "Некорректный ввод ID. Введите Enter для продолжения...\n";
+            cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ ID. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             cin.get();
             system("cls");
             return;
         }
         int user_id = stoi(s);
 
-        // Проверка существования пользователя
+        // РџСЂРѕРІРµСЂРєР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
         PreparedStatement* checkStmt = con->prepareStatement(
-            "SELECT id FROM users WHERE id = ?"
+            "SELECT id, login FROM users WHERE id = ?"
         );
         checkStmt->setInt(1, user_id);
         ResultSet* result = checkStmt->executeQuery();
 
         if (!result->next()) {
-            cout << "Пользователь с таким ID не найден. Введите Enter для продолжения...\n";
+            cout << "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ С‚Р°РєРёРј ID РЅРµ РЅР°Р№РґРµРЅ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             delete result;
             delete checkStmt;
             cin.get();
@@ -97,11 +96,11 @@ void Delete_User() {
             return;
         }
 
-        string full_name = result->getString("full_name");
-        cout << "Пользователь найден: " << full_name << endl;
+        string full_name = result->getString("login");
+        cout << "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅР°Р№РґРµРЅ: " << full_name << endl;
 
-        // Подтверждение удаления
-        cout << "Вы ТОЧНО хотите удалить этого пользователя?\n1 - Да\n0 - Нет\n";
+        // РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ СѓРґР°Р»РµРЅРёСЏ
+        cout << "Р’С‹ РўРћР§РќРћ С…РѕС‚РёС‚Рµ СѓРґР°Р»РёС‚СЊ СЌС‚РѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ?\n1 - Р”Р°\n0 - РќРµС‚\n";
         char choice;
         cin >> choice;
         clearInputBuffer();
@@ -113,7 +112,7 @@ void Delete_User() {
             return;
         }
 
-        // Удаление пользователя
+        // РЈРґР°Р»РµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
         PreparedStatement* deleteStmt = con->prepareStatement(
             "DELETE FROM users WHERE id = ?"
         );
@@ -122,13 +121,13 @@ void Delete_User() {
         int affected_rows = deleteStmt->executeUpdate();
 
         if (affected_rows > 0) {
-            cout << "Пользователь успешно удален. Введите Enter для продолжения...\n";
+            cout << "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
         }
         else {
-            cout << "Не удалось удалить пользователя. Введите Enter для продолжения...\n";
+            cout << "РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
         }
 
-        // Освобождение ресурсов
+        // РћСЃРІРѕР±РѕР¶РґРµРЅРёРµ СЂРµСЃСѓСЂСЃРѕРІ
         delete deleteStmt;
         delete result;
         delete checkStmt;
@@ -138,34 +137,34 @@ void Delete_User() {
 
     }
     catch (SQLException& e) {
-        cerr << "Ошибка SQL при удалении пользователя: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР° SQL РїСЂРё СѓРґР°Р»РµРЅРёРё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ: " << e.what() << endl;
         cin.get();
         system("cls");
     }
     catch (const exception& e) {
-        cerr << "Ошибка: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР°: " << e.what() << endl;
         cin.get();
         system("cls");
     }
 }
 
-//Вывод всех пользователей
+//Р’С‹РІРѕРґ РІСЃРµС… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
 void Read_User() {
     try {
         Database db;
         Connection* con = db.getConnection();
 
-        // Создание и выполнение запроса
+        // РЎРѕР·РґР°РЅРёРµ Рё РІС‹РїРѕР»РЅРµРЅРёРµ Р·Р°РїСЂРѕСЃР°
         Statement* stmt = con->createStatement();
         ResultSet* res = stmt->executeQuery(
             "SELECT id, login, password FROM users WHERE access = TRUE"
         );
 
-        // Вывод заголовка
+        // Р’С‹РІРѕРґ Р·Р°РіРѕР»РѕРІРєР°
         PrintUserHeader();
         bool hasData = false;
 
-        // Вывод данных
+        // Р’С‹РІРѕРґ РґР°РЅРЅС‹С…
         while (res->next()) {
             hasData = true;
             cout << left
@@ -176,43 +175,42 @@ void Read_User() {
         }
 
         if (!hasData) {
-            cout << "Список пользователей пуст\n";
+            cout << "РЎРїРёСЃРѕРє РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ РїСѓСЃС‚\n";
         }
 
-        // Освобождение ресурсов
+        // РћСЃРІРѕР±РѕР¶РґРµРЅРёРµ СЂРµСЃСѓСЂСЃРѕРІ
         delete res;
         delete stmt;
 
-        cout << "Нажмите Enter для продолжения\n";
+        cout << "РќР°Р¶РјРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ\n";
         cin.get();
         system("cls");
 
     }
     catch (SQLException& e) {
-        cerr << "Ошибка чтения пользователей: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР° С‡С‚РµРЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№: " << e.what() << endl;
         cin.get();
         system("cls");
     }
     catch (const exception& e) {
-        cerr << "Ошибка: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР°: " << e.what() << endl;
         cin.get();
         system("cls");
     }
 }
 
-//Регистрация пользователя(альтернативная)
+//Р РµРіРёСЃС‚СЂР°С†РёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ(Р°Р»СЊС‚РµСЂРЅР°С‚РёРІРЅР°СЏ)
 void User_Registration() {
     try {
         Database db;
         Connection* con = db.getConnection();
         string log, pas;
 
-        // Ввод логина
-        cout << "\nВведите логин: ";
-        cin >> log;
-        clearInputBuffer();
+        // Р’РІРѕРґ Р»РѕРіРёРЅР°
+        cout << "\nР’РІРµРґРёС‚Рµ Р»РѕРіРёРЅ: ";
+        log = read_utf8_line("");
 
-        // Проверка уникальности логина
+        // РџСЂРѕРІРµСЂРєР° СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚Рё Р»РѕРіРёРЅР°
         PreparedStatement* checkStmt = con->prepareStatement(
             "SELECT login FROM users WHERE login = ?"
         );
@@ -220,7 +218,7 @@ void User_Registration() {
         ResultSet* result = checkStmt->executeQuery();
 
         if (result->next()) {
-            cout << "Пользователь с таким логином уже существует. Введите Enter для продолжения...\n";
+            cout << "РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ С‚Р°РєРёРј Р»РѕРіРёРЅРѕРј СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             delete result;
             delete checkStmt;
             cin.get();
@@ -228,11 +226,11 @@ void User_Registration() {
             return;
         }
 
-        // Ввод пароля
-        cout << "Введите пароль: ";
-        pas = Get_Password(); // Функция с скрытым вводом пароля
+        // Р’РІРѕРґ РїР°СЂРѕР»СЏ
+        cout << "Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ: ";
+        pas = Get_Password(); // Р¤СѓРЅРєС†РёСЏ СЃ СЃРєСЂС‹С‚С‹Рј РІРІРѕРґРѕРј РїР°СЂРѕР»СЏ
 
-        // Вставка нового пользователя
+        // Р’СЃС‚Р°РІРєР° РЅРѕРІРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
         PreparedStatement* insertStmt = con->prepareStatement(
             "INSERT INTO users (login, password, access) "
             "VALUES (?, ?, ?)"
@@ -245,13 +243,13 @@ void User_Registration() {
         int affected_rows = insertStmt->executeUpdate();
 
         if (affected_rows > 0) {
-            cout << "Регистрация успешна. Доступ будет открыт после подтверждения администратора. Введите Enter для продолжения...\n";
+            cout << "Р РµРіРёСЃС‚СЂР°С†РёСЏ СѓСЃРїРµС€РЅР°. Р”РѕСЃС‚СѓРї Р±СѓРґРµС‚ РѕС‚РєСЂС‹С‚ РїРѕСЃР»Рµ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
         }
         else {
-            cout << "Ошибка регистрации. Введите Enter для продолжения...\n";
+            cout << "РћС€РёР±РєР° СЂРµРіРёСЃС‚СЂР°С†РёРё. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
         }
 
-        // Освобождение ресурсов
+        // РћСЃРІРѕР±РѕР¶РґРµРЅРёРµ СЂРµСЃСѓСЂСЃРѕРІ
         delete insertStmt;
         delete result;
         delete checkStmt;
@@ -261,18 +259,18 @@ void User_Registration() {
 
     }
     catch (SQLException& e) {
-        cerr << "Ошибка SQL при регистрации: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР° SQL РїСЂРё СЂРµРіРёСЃС‚СЂР°С†РёРё: " << e.what() << endl;
         cin.get();
         system("cls");
     }
     catch (const exception& e) {
-        cerr << "Ошибка: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР°: " << e.what() << endl;
         cin.get();
         system("cls");
     }
 }
 
-//Подтверждение пользователя
+//РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
 void Verify_User() {
     try {
         Database db;
@@ -280,7 +278,7 @@ void Verify_User() {
         bool hasUnverified = false;
 
         do {
-            // Получаем всех неподтвержденных пользователей
+            // РџРѕР»СѓС‡Р°РµРј РІСЃРµС… РЅРµРїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№
             PreparedStatement* selectStmt = con->prepareStatement(
                 "SELECT id, login, password FROM users WHERE access = FALSE"
             );
@@ -293,11 +291,11 @@ void Verify_User() {
                 string login = res->getString("login");
                 string password = res->getString("password");
 
-                // Вывод информации о пользователе
+                // Р’С‹РІРѕРґ РёРЅС„РѕСЂРјР°С†РёРё Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»Рµ
                 cout << "\nID: " << user_id
-                    << "\nЛогин: " << login
-                    << "\nПароль: " << password
-                    << "\n\n1 - Подтвердить аккаунт\n0 - Отклонить/Удалить\nВыбор: ";
+                    << "\nР›РѕРіРёРЅ: " << login
+                    << "\nРџР°СЂРѕР»СЊ: " << password
+                    << "\n\n1 - РџРѕРґС‚РІРµСЂРґРёС‚СЊ Р°РєРєР°СѓРЅС‚\n0 - РћС‚РєР»РѕРЅРёС‚СЊ/РЈРґР°Р»РёС‚СЊ\nР’С‹Р±РѕСЂ: ";
 
                 char choice;
                 cin >> choice;
@@ -305,40 +303,34 @@ void Verify_User() {
 
                 switch (choice) {
                 case '1': {
-                    // Подтверждение аккаунта
+                    // РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ Р°РєРєР°СѓРЅС‚Р°
                     PreparedStatement* updateStmt = con->prepareStatement(
                         "UPDATE users SET access = TRUE WHERE id = ?"
                     );
                     updateStmt->setInt(1, user_id);
 
                     if (updateStmt->executeUpdate() > 0) {
-                        cout << "Аккаунт подтвержден.\n";
+                        cout << "РђРєРєР°СѓРЅС‚ РїРѕРґС‚РІРµСЂР¶РґРµРЅ.\n";
+                        cin.get();
                     }
                     delete updateStmt;
                     break;
                 }
                 case '0': {
-                    // Удаление аккаунта
-                    cout << "Удалить аккаунт? (1 - Да, 0 - Нет): ";
-                    char deleteChoice;
-                    cin >> deleteChoice;
-                    clearInputBuffer();
-
-                    if (deleteChoice == '1') {
                         PreparedStatement* deleteStmt = con->prepareStatement(
                             "DELETE FROM users WHERE id = ?"
                         );
                         deleteStmt->setInt(1, user_id);
 
                         if (deleteStmt->executeUpdate() > 0) {
-                            cout << "Аккаунт удален.\n";
+                            cout << "РђРєРєР°СѓРЅС‚ СѓРґР°Р»РµРЅ.\n";
+                                cin.get();
                         }
                         delete deleteStmt;
-                    }
                     break;
                 }
                 default: {
-                    cout << "Некорректный ввод. Пропускаем пользователя.\n";
+                    cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ. РџСЂРѕРїСѓСЃРєР°РµРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ.\n";
                     break;
                 }
                 }
@@ -348,53 +340,52 @@ void Verify_User() {
             delete res;
             delete selectStmt;
 
-        } while (hasUnverified); // Повторяем, пока есть неподтвержденные
+        } while (hasUnverified); // РџРѕРІС‚РѕСЂСЏРµРј, РїРѕРєР° РµСЃС‚СЊ РЅРµРїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹Рµ
 
-        cout << "Неподтвержденных аккаунтов нет.\nНажмите Enter для продолжения...";
+        cout << "РќРµРїРѕРґС‚РІРµСЂР¶РґРµРЅРЅС‹С… Р°РєРєР°СѓРЅС‚РѕРІ РЅРµС‚.\nРќР°Р¶РјРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...";
         cin.get();
         system("cls");
 
     }
     catch (SQLException& e) {
-        cerr << "Ошибка SQL: " << e.what() << endl;
+        cout << "РћС€РёР±РєР° SQL: " << e.what() << endl;
         cin.get();
         system("cls");
     }
     catch (const exception& e) {
-        cerr << "Ошибка: " << e.what() << endl;
         cin.get();
         system("cls");
     }
 }
 
-//Функция для создания первого админа, работает при первом запуске программы
+//Р¤СѓРЅРєС†РёСЏ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РїРµСЂРІРѕРіРѕ Р°РґРјРёРЅР°, СЂР°Р±РѕС‚Р°РµС‚ РїСЂРё РїРµСЂРІРѕРј Р·Р°РїСѓСЃРєРµ РїСЂРѕРіСЂР°РјРјС‹
 void FirstRunSetup() {
     try {
         Database db;
         Connection* con = db.getConnection();
 
-        // Проверяем наличие администраторов
+        // РџСЂРѕРІРµСЂСЏРµРј РЅР°Р»РёС‡РёРµ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРІ
         Statement* stmt = con->createStatement();
         ResultSet* res = stmt->executeQuery("SELECT COUNT(*) FROM admins");
 
         res->next();
         if (res->getInt(1) == 0) {
-            cout << "=== Первый запуск системы ===" << endl;
-            cout << "Создание администратора:" << endl;
+            cout << "=== РџРµСЂРІС‹Р№ Р·Р°РїСѓСЃРє СЃРёСЃС‚РµРјС‹ ===" << endl;
+            cout << "РЎРѕР·РґР°РЅРёРµ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°:" << endl;
 
             string login, password;
 
-            cout << "Введите логин: ";
+            cout << "Р’РІРµРґРёС‚Рµ Р»РѕРіРёРЅ: ";
             cin >> login;
             clearInputBuffer();
 
-            cout << "Введите пароль: ";
-            password = Get_Password(); // Скрытый ввод
+            cout << "Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ: ";
+            password = Get_Password(); // РЎРєСЂС‹С‚С‹Р№ РІРІРѕРґ
 
-            // Хеширование пароля
+            // РҐРµС€РёСЂРѕРІР°РЅРёРµ РїР°СЂРѕР»СЏ
             string hashed_pw = sha256(password);
 
-            // Добавление в базу
+            // Р”РѕР±Р°РІР»РµРЅРёРµ РІ Р±Р°Р·Сѓ
             PreparedStatement* pstmt = con->prepareStatement(
                 "INSERT INTO admins (login, password) VALUES (?, ?)"
             );
@@ -402,8 +393,8 @@ void FirstRunSetup() {
             pstmt->setString(2, hashed_pw);
             pstmt->executeUpdate();
 
-            cout << "\nАдминистратор создан! Теперь вы можете войти в систему.\n";
-            // cout << "Добавлен администратор: " << login << " / " << hashed_pw << endl;//dobavil
+            cout << "\nРђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ СЃРѕР·РґР°РЅ! РўРµРїРµСЂСЊ РІС‹ РјРѕР¶РµС‚Рµ РІРѕР№С‚Рё РІ СЃРёСЃС‚РµРјСѓ.\n";
+            // cout << "Р”РѕР±Р°РІР»РµРЅ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ: " << login << " / " << hashed_pw << endl;//dobavil
             delete pstmt;
         }
 
@@ -411,27 +402,26 @@ void FirstRunSetup() {
         delete stmt;
     }
     catch (SQLException& e) {
-        cerr << "Ошибка инициализации: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР° РёРЅРёС†РёР°Р»РёР·Р°С†РёРё: " << e.what() << endl;
         exit(1);
     }
 }
 
-//Функция входа в систему
+//Р¤СѓРЅРєС†РёСЏ РІС…РѕРґР° РІ СЃРёСЃС‚РµРјСѓ
 void Enter() {
     try {
         Database db;
         Connection* con = db.getConnection();
         string l, p;
-        // Ввод данных
-        cout << "Введите логин: ";
-        cin >> l;
-        clearInputBuffer();
+        // Р’РІРѕРґ РґР°РЅРЅС‹С…
+        cout << "Р’РІРµРґРёС‚Рµ Р»РѕРіРёРЅ: ";
+        l = read_utf8_line("");
 
-        cout << "Введите пароль: ";
+        cout << "Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ: ";
         p = Get_Password();
         string hashed_input = sha256(p);
 
-        // 1. Проверка администратора
+        // 1. РџСЂРѕРІРµСЂРєР° Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°
         PreparedStatement* adminStmt = con->prepareStatement(
             "SELECT id FROM admins WHERE login = ? AND password = ?"
         );
@@ -453,7 +443,7 @@ void Enter() {
         delete adminRes;
         delete adminStmt;
 
-        // 2. Проверка обычного пользователя
+        // 2. РџСЂРѕРІРµСЂРєР° РѕР±С‹С‡РЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
         PreparedStatement* userStmt = con->prepareStatement(
             "SELECT id, access FROM users WHERE login = ? AND password = ?"
         );
@@ -474,41 +464,41 @@ void Enter() {
                 return;
             }
             else {
-                cout << "Аккаунт не подтвержден администратором!\n";
+                cout << "РђРєРєР°СѓРЅС‚ РЅРµ РїРѕРґС‚РІРµСЂР¶РґРµРЅ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРј!\n";
             }
         }
         else {
-            cout << "Неверный логин или пароль!\n";
+            cout << "РќРµРІРµСЂРЅС‹Р№ Р»РѕРіРёРЅ РёР»Рё РїР°СЂРѕР»СЊ!\n";
         }
 
         delete userRes;
         delete userStmt;
 
-        cout << "Введите Enter для продолжения...";
+        cout << "Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...";
         cin.get();
         system("cls");
 
     }
     catch (SQLException& e) {
-        cerr << "Ошибка SQL при входе: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР° SQL РїСЂРё РІС…РѕРґРµ: " << e.what() << endl;
         cin.get();
         system("cls");
     }
     catch (const exception& e) {
-        cerr << "Ошибка: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР°: " << e.what() << endl;
         cin.get();
         system("cls");
     }
 }
 
-//Функция меню вошедшего пользователя, есть режим пользователя и администратора
+//Р¤СѓРЅРєС†РёСЏ РјРµРЅСЋ РІРѕС€РµРґС€РµРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ, РµСЃС‚СЊ СЂРµР¶РёРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ Рё Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°
 void Menu(int user_id, bool is_admin) {
     char choice = '1';
     try {
         Database db;
         Connection* con = db.getConnection();
 
-        // Выбираем правильную таблицу в зависимости от типа пользователя
+        // Р’С‹Р±РёСЂР°РµРј РїСЂР°РІРёР»СЊРЅСѓСЋ С‚Р°Р±Р»РёС†Сѓ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РёРїР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
         string query = is_admin
             ? "SELECT login FROM admins WHERE id = ?"
             : "SELECT login, access FROM users WHERE id = ?";
@@ -518,13 +508,13 @@ void Menu(int user_id, bool is_admin) {
         ResultSet* userRes = userStmt->executeQuery();
 
         if (!userRes->next()) {
-            cout << "Ошибка: пользователь не найден!\n";
+            cout << "РћС€РёР±РєР°: РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ!\n";
             delete userRes;
             delete userStmt;
             return;
         }
 
-        // Получаем данные пользователя
+        // РџРѕР»СѓС‡Р°РµРј РґР°РЅРЅС‹Рµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ
         string current_login = userRes->getString("login");
         bool current_access = is_admin ? true : userRes->getBoolean("access");
 
@@ -534,57 +524,57 @@ void Menu(int user_id, bool is_admin) {
         while (choice != '0') {
             system("cls");
 
-            // Вывод приветствия
+            // Р’С‹РІРѕРґ РїСЂРёРІРµС‚СЃС‚РІРёСЏ
             if (is_admin) {
                 cout << "-------------------------------------------\n"
-                    << "   Добро пожаловать, " << current_login << "\n"
-                    << "      МЕНЮ АДМИНИСТРАТОРА\n"
+                    << "   Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ, " << current_login << "\n"
+                    << "      РњР•РќР® РђР”РњРРќРРЎРўР РђРўРћР Рђ\n"
                     << "-------------------------------------------\n";
             }
             else {
                 if (current_access) {
                     cout << "-------------------------------------------\n"
-                        << "    Добро пожаловать, " << current_login << "\n"
-                        << "        МЕНЮ ПОЛЬЗОВАТЕЛЯ\n"
+                        << "    Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ, " << current_login << "\n"
+                        << "        РњР•РќР® РџРћР›Р¬Р—РћР’РђРўР•Р›РЇ\n"
                         << "-------------------------------------------\n";
                 }
                 else {
-                    cout << "\nВаш аккаунт ещё не подтверждён администратором\n"
-                        << "Нажмите Enter для возврата в главное меню...";
+                    cout << "\nР’Р°С€ Р°РєРєР°СѓРЅС‚ РµС‰С‘ РЅРµ РїРѕРґС‚РІРµСЂР¶РґС‘РЅ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂРѕРј\n"
+                        << "РќР°Р¶РјРёС‚Рµ Enter РґР»СЏ РІРѕР·РІСЂР°С‚Р° РІ РіР»Р°РІРЅРѕРµ РјРµРЅСЋ...";
                     cin.get();
                     return;
                 }
             }
 
-            // Основное меню
-            cout << "\nОсновные операции:\n"
-                << "1 - Добавить сотрудника\n"
-                << "2 - Изменить данные сотрудника\n"
-                << "3 - Удалить сотрудника\n"
-                << "4 - Фильтр сотрудников\n"
-                << "5 - Поиск сотрудника\n"
-                << "6 - Сортировка сотрудников\n"
-                << "7 - Показать всех сотрудников\n";
+            // РћСЃРЅРѕРІРЅРѕРµ РјРµРЅСЋ
+            cout << "\nРћСЃРЅРѕРІРЅС‹Рµ РѕРїРµСЂР°С†РёРё:\n"
+                << "1 - Р”РѕР±Р°РІРёС‚СЊ СЃРѕС‚СЂСѓРґРЅРёРєР°\n"
+                << "2 - РР·РјРµРЅРёС‚СЊ РґР°РЅРЅС‹Рµ СЃРѕС‚СЂСѓРґРЅРёРєР°\n"
+                << "3 - РЈРґР°Р»РёС‚СЊ СЃРѕС‚СЂСѓРґРЅРёРєР°\n"
+                << "4 - Р¤РёР»СЊС‚СЂ СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ\n"
+                << "5 - РџРѕРёСЃРє СЃРѕС‚СЂСѓРґРЅРёРєР°\n"
+                << "6 - РЎРѕСЂС‚РёСЂРѕРІРєР° СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ\n"
+                << "7 - РџРѕРєР°Р·Р°С‚СЊ РІСЃРµС… СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ\n";
 
-            // Дополнительные опции для администратора
+            // Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РѕРїС†РёРё РґР»СЏ Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°
             if (is_admin) {
-                cout << "\nУправление пользователями:\n"
-                    << "a - Добавить пользователя\n"
-                    << "b - Удалить пользователя\n"
-                    << "c - Просмотр всех пользователей\n"
-                    << "d - Подтверждение регистраций\n";
+                cout << "\nРЈРїСЂР°РІР»РµРЅРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏРјРё:\n"
+                    << "a - Р”РѕР±Р°РІРёС‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ\n"
+                    << "b - РЈРґР°Р»РёС‚СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ\n"
+                    << "c - РџСЂРѕСЃРјРѕС‚СЂ РІСЃРµС… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№\n"
+                    << "d - РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ СЂРµРіРёСЃС‚СЂР°С†РёР№\n";
             }
 
-            cout << "\n0 - Выход из аккаунта\n"
+            cout << "\n0 - Р’С‹С…РѕРґ РёР· Р°РєРєР°СѓРЅС‚Р°\n"
                 << "-------------------------------------------\n"
-                << "Выберите операцию: ";
+                << "Р’С‹Р±РµСЂРёС‚Рµ РѕРїРµСЂР°С†РёСЋ: ";
 
             cin >> choice;
             clearInputBuffer();
             system("cls");
 
             switch (choice) {
-                // Общие операции
+                // РћР±С‰РёРµ РѕРїРµСЂР°С†РёРё
             case '1': Add_Employee(); break;
             case '2': Change_Employee(); break;
             case '3': Delete_Employee(); break;
@@ -593,7 +583,7 @@ void Menu(int user_id, bool is_admin) {
             case '6': Sort_Employee(); break;
             case '7': Read_Employee(); break;
 
-                // Опции администратора
+                // РћРїС†РёРё Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂР°
             case 'a': if (is_admin) Add_User(); break;
             case 'b': if (is_admin) Delete_User(); break;
             case 'c': if (is_admin) Read_User(); break;
@@ -602,20 +592,20 @@ void Menu(int user_id, bool is_admin) {
             case '0': break;
 
             default:
-                cout << "Некорректный выбор! Пожалуйста, попробуйте снова.\n";
+                cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІС‹Р±РѕСЂ! РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РїРѕРїСЂРѕР±СѓР№С‚Рµ СЃРЅРѕРІР°.\n";
                 cin.get();
                 break;
             }
         }
     }
     catch (SQLException& e) {
-        cerr << "Ошибка базы данных: " << e.what()
-            << " (Код ошибки: " << e.getErrorCode()
+        cerr << "РћС€РёР±РєР° Р±Р°Р·С‹ РґР°РЅРЅС‹С…: " << e.what()
+            << " (РљРѕРґ РѕС€РёР±РєРё: " << e.getErrorCode()
             << ", SQL State: " << e.getSQLState() << ")\n";
         cin.get();
     }
     catch (const exception& e) {
-        cerr << "Системная ошибка: " << e.what() << endl;
+        cerr << "РЎРёСЃС‚РµРјРЅР°СЏ РѕС€РёР±РєР°: " << e.what() << endl;
         cin.get();
     }
 }

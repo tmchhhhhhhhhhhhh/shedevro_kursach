@@ -16,64 +16,59 @@
 using namespace std;
 using namespace sql;
 
-//Вывод "шапки" вывода рабочих
+
+
+// Р’С‹РІРѕРґ "С€Р°РїРєРё" С‚Р°Р±Р»РёС†С‹
 void PrintEmployeeHeader() {
     cout << left
-        << setw(6) << "ID"
-        << setw(25) << "ФИО"
-        << setw(10) << "Возраст"
-        << setw(20) << "Должность"
-        << setw(12) << "Зарплата"
+        << setw(8) << "ID"
+        << setw(30) << "Р¤РРћ"
+        << right << setw(10) << "Р’РѕР·СЂР°СЃС‚"
+        << "  "
+        << left << setw(20) << "Р”РѕР»Р¶РЅРѕСЃС‚СЊ"
+        << right << setw(12) << "Р—Р°СЂРїР»Р°С‚Р°"
         << endl;
-    cout << setfill('-') << setw(73) << "" << setfill(' ') << endl;
+
+    cout << setfill('-')
+        << setw(8 + 30 + 10 + 2 + 20 + 12) << ""
+        << setfill(' ')
+        << endl;
 }
 
-//Форматированный вывод рабочего
+// Р’С‹РІРѕРґ СЃС‚СЂРѕРєРё СЃ РґР°РЅРЅС‹РјРё
 void PrintEmployeeRow(const Employee& emp) {
+    auto trim = [](const string& s, size_t width) {
+        if (width < 5) return s;
+        return (s.length() > width) ? s.substr(0, width - 3) + "..." : s;
+        };
+
     cout << left
-        << setw(6) << emp.id
-        << setw(25) << emp.full_name
-        << setw(10) << emp.age
-        << setw(20) << emp.Position
-        << fixed << setprecision(2)
+        << setw(8) << emp.id
+        << setw(30) << trim(emp.full_name, 30)
+        << right << setw(10) << emp.age
+        << "  " 
+        << left << setw(20) << trim(emp.Position, 20)
+        << right << fixed << setprecision(2)
         << setw(12) << emp.salary
-        << endl;
+        << endl
+        << left;
 }
 
-//Удаление рабочего
+//Р”РѕР±Р°РІР»РµРЅРёРµ СЂР°Р±РѕС‡РµРіРѕ
 void Add_Employee() {
     try {
         Database db;
         Connection* con = db.getConnection();
         string id_s, name_s, age_s, pos_s, sal_s;
+        cout << "\nР’РІРµРґРёС‚Рµ Р¤РРћ: ";
+        name_s = read_utf8_line("");
+        //clearInputBuffer();
 
-        cout << "\nВведите ФИО: ";
-        cin >> name_s;
-        clearInputBuffer();
-
-        cout << "Введите индекс: ";
+        cout << "Р’РІРµРґРёС‚Рµ РёРЅРґРµРєСЃ: ";
         cin >> id_s;
         clearInputBuffer();
         if (prov(id_s) != 1) {
-            cout << "Некорректный ввод ID. Enter...\n"; cin.get(); system("cls"); return;
-        }
-
-        cout << "Введите возраст: ";
-        cin >> age_s;
-        clearInputBuffer();
-        if (prov(age_s) != 1) {
-            cout << "Некорректный возраст. Enter...\n"; cin.get(); system("cls"); return;
-        }
-
-        cout << "Введите должность: ";
-        cin >> pos_s;
-        clearInputBuffer();
-
-        cout << "Введите зарплату: ";
-        cin >> sal_s;
-        clearInputBuffer();
-        if (prov(sal_s) < 1) {
-            cout << "Некорректная зарплата. Enter...\n"; cin.get(); system("cls"); return;
+            cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ ID. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n"; cin.get(); system("cls"); return;
         }
 
         PreparedStatement* checkStmt = con->prepareStatement("SELECT id FROM employees WHERE id = ? OR full_name = ?");
@@ -82,9 +77,29 @@ void Add_Employee() {
         ResultSet* result = checkStmt->executeQuery();
 
         if (result->next()) {
-            cout << "Сотрудник уже существует. Enter...\n"; cin.get(); system("cls");
+            cout << "РЎРѕС‚СЂСѓРґРЅРёРє СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n"<<name_s<<"   "<<id_s; cin.get(); system("cls");
             delete result; delete checkStmt; return;
         }
+
+        cout << "Р’РІРµРґРёС‚Рµ РІРѕР·СЂР°СЃС‚: ";
+        cin >> age_s;
+        clearInputBuffer();
+        if (prov(age_s) != 1) {
+            cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРѕР·СЂР°СЃС‚. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n"; cin.get(); system("cls"); return;
+        }
+
+        cout << "Р’РІРµРґРёС‚Рµ РґРѕР»Р¶РЅРѕСЃС‚СЊ: ";
+        pos_s = read_utf8_line("");
+        //clearInputBuffer();
+
+        cout << "Р’РІРµРґРёС‚Рµ Р·Р°СЂРїР»Р°С‚Сѓ: ";
+        cin >> sal_s;
+        clearInputBuffer();
+        if (prov(sal_s) < 1) {
+            cout << "РќРµРєРѕСЂСЂРµРєС‚РЅР°СЏ Р·Р°СЂРїР»Р°С‚Р°. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n"; cin.get(); system("cls"); return;
+        }
+
+     
 
         PreparedStatement* pstmt = con->prepareStatement("INSERT INTO employees (id, full_name, age, position, salary) VALUES (?, ?, ?, ?, ?)");
         pstmt->setInt(1, stoi(id_s));
@@ -94,38 +109,39 @@ void Add_Employee() {
         pstmt->setDouble(5, stold(sal_s));
         pstmt->execute();
 
-        cout << "Сотрудник добавлен. Enter...\n";
+        cout << "РЎРѕС‚СЂСѓРґРЅРёРє РґРѕР±Р°РІР»РµРЅ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
         cin.get(); system("cls");
 
         delete pstmt; delete result; delete checkStmt;
     }
     catch (SQLException& e) {
         cerr << "SQL Error: " << e.what() << endl;
+        cin.get(); system("cls");
     }
 }
 
-//Изменеие рабочего
+//РР·РјРµРЅРµРёРµ СЂР°Р±РѕС‡РµРіРѕ
 void Change_Employee() {
     try {
         Database db;
         Connection* con = db.getConnection();
         string s;
 
-        // Ввод ID сотрудника
-        cout << "\nВведите ID сотрудника для изменения: ";
+        // Р’РІРѕРґ ID СЃРѕС‚СЂСѓРґРЅРёРєР°
+        cout << "\nР’РІРµРґРёС‚Рµ ID СЃРѕС‚СЂСѓРґРЅРёРєР° РґР»СЏ РёР·РјРµРЅРµРЅРёСЏ: ";
         cin >> s;
         clearInputBuffer();
 
-        // Проверка корректности ввода ID
+        // РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё РІРІРѕРґР° ID
         if (prov(s) != 1) {
-            cout << "Некорректный ввод ID. Введите Enter для продолжения...\n";
+            cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ ID. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             cin.get();
             system("cls");
             return;
         }
         int employee_id = stoi(s);
 
-        // Проверка существования сотрудника
+        // РџСЂРѕРІРµСЂРєР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ СЃРѕС‚СЂСѓРґРЅРёРєР°
         PreparedStatement* checkStmt = con->prepareStatement(
             "SELECT id FROM employees WHERE id = ?"
         );
@@ -133,7 +149,7 @@ void Change_Employee() {
         ResultSet* result = checkStmt->executeQuery();
 
         if (!result->next()) {
-            cout << "Сотрудник с таким ID не найден. Введите Enter для продолжения...\n";
+            cout << "РЎРѕС‚СЂСѓРґРЅРёРє СЃ С‚Р°РєРёРј ID РЅРµ РЅР°Р№РґРµРЅ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             delete result;
             delete checkStmt;
             cin.get();
@@ -141,34 +157,34 @@ void Change_Employee() {
             return;
         }
 
-        // Ввод новых данных
+        // Р’РІРѕРґ РЅРѕРІС‹С… РґР°РЅРЅС‹С…
         string name_s, age_s, pos_s, sal_s;
 
-        cout << "Введите новое ФИО: ";
+        cout << "Р’РІРµРґРёС‚Рµ РЅРѕРІРѕРµ Р¤РРћ: ";
         getline(cin, name_s);
 
-        cout << "Введите новый возраст: ";
+        cout << "Р’РІРµРґРёС‚Рµ РЅРѕРІС‹Р№ РІРѕР·СЂР°СЃС‚: ";
         getline(cin, age_s);
         if (prov(age_s) != 1) {
-            cout << "Некорректный возраст. Введите Enter для продолжения...\n";
+            cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРѕР·СЂР°СЃС‚. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             cin.get();
             system("cls");
             return;
         }
 
-        cout << "Введите новую должность: ";
+        cout << "Р’РІРµРґРёС‚Рµ РЅРѕРІСѓСЋ РґРѕР»Р¶РЅРѕСЃС‚СЊ: ";
         getline(cin, pos_s);
 
-        cout << "Введите новую зарплату: ";
+        cout << "Р’РІРµРґРёС‚Рµ РЅРѕРІСѓСЋ Р·Р°СЂРїР»Р°С‚Сѓ: ";
         getline(cin, sal_s);
         if (prov(sal_s) < 1) {
-            cout << "Некорректная зарплата. Введите Enter для продолжения...\n";
+            cout << "РќРµРєРѕСЂСЂРµРєС‚РЅР°СЏ Р·Р°СЂРїР»Р°С‚Р°. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             cin.get();
             system("cls");
             return;
         }
 
-        // Обновление данных в базе
+        // РћР±РЅРѕРІР»РµРЅРёРµ РґР°РЅРЅС‹С… РІ Р±Р°Р·Рµ
         PreparedStatement* updateStmt = con->prepareStatement(
             "UPDATE employees SET "
             "full_name = ?, "
@@ -187,13 +203,13 @@ void Change_Employee() {
         int affected_rows = updateStmt->executeUpdate();
 
         if (affected_rows > 0) {
-            cout << "Данные сотрудника успешно обновлены. Введите Enter для продолжения...\n";
+            cout << "Р”Р°РЅРЅС‹Рµ СЃРѕС‚СЂСѓРґРЅРёРєР° СѓСЃРїРµС€РЅРѕ РѕР±РЅРѕРІР»РµРЅС‹. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
         }
         else {
-            cout << "Не удалось обновить данные сотрудника. Введите Enter для продолжения...\n";
+            cout << "РќРµ СѓРґР°Р»РѕСЃСЊ РѕР±РЅРѕРІРёС‚СЊ РґР°РЅРЅС‹Рµ СЃРѕС‚СЂСѓРґРЅРёРєР°. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
         }
 
-        // Очистка ресурсов
+        // РћС‡РёСЃС‚РєР° СЂРµСЃСѓСЂСЃРѕРІ
         delete updateStmt;
         delete result;
         delete checkStmt;
@@ -203,47 +219,47 @@ void Change_Employee() {
 
     }
     catch (SQLException& e) {
-        cerr << "Ошибка SQL при изменении сотрудника: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР° SQL РїСЂРё РёР·РјРµРЅРµРЅРёРё СЃРѕС‚СЂСѓРґРЅРёРєР°: " << e.what() << endl;
         cin.get();
         system("cls");
     }
     catch (const exception& e) {
-        cerr << "Ошибка: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР°: " << e.what() << endl;
         cin.get();
         system("cls");
     }
 }
 
-//Удаление рабочего
+//РЈРґР°Р»РµРЅРёРµ СЂР°Р±РѕС‡РµРіРѕ
 void Delete_Employee() {
     try {
         Database db;
         Connection* con = db.getConnection();
         string s;
 
-        // Ввод ID сотрудника
-        cout << "\nВведите ID сотрудника для удаления: ";
+        // Р’РІРѕРґ ID СЃРѕС‚СЂСѓРґРЅРёРєР°
+        cout << "\nР’РІРµРґРёС‚Рµ ID СЃРѕС‚СЂСѓРґРЅРёРєР° РґР»СЏ СѓРґР°Р»РµРЅРёСЏ: ";
         cin >> s;
         clearInputBuffer();
 
-        // Проверка корректности ввода
+        // РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё РІРІРѕРґР°
         if (prov(s) != 1) {
-            cout << "Некорректный ввод ID. Введите Enter для продолжения...\n";
+            cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ ID. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             cin.get();
             system("cls");
             return;
         }
         int employee_id = stoi(s);
 
-        // Проверка существования сотрудника
+        // РџСЂРѕРІРµСЂРєР° СЃСѓС‰РµСЃС‚РІРѕРІР°РЅРёСЏ СЃРѕС‚СЂСѓРґРЅРёРєР°
         PreparedStatement* checkStmt = con->prepareStatement(
-            "SELECT id FROM employees WHERE id = ?"
+            "SELECT id, full_name FROM employees WHERE id = ?"
         );
         checkStmt->setInt(1, employee_id);
         ResultSet* result = checkStmt->executeQuery();
 
         if (!result->next()) {
-            cout << "Сотрудник с таким ID не найден. Введите Enter для продолжения...\n";
+            cout << "РЎРѕС‚СЂСѓРґРЅРёРє СЃ С‚Р°РєРёРј ID РЅРµ РЅР°Р№РґРµРЅ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             delete result;
             delete checkStmt;
             cin.get();
@@ -252,10 +268,10 @@ void Delete_Employee() {
         }
 
         string full_name = result->getString("full_name");
-        cout << "Сотрудник найден: " << full_name << endl;
+        cout << "РЎРѕС‚СЂСѓРґРЅРёРє РЅР°Р№РґРµРЅ: " << full_name << endl;
 
-        // Подтверждение удаления
-        cout << "Вы ТОЧНО хотите удалить этого сотрудника?\n1 - Да\n0 - Нет\n";
+        // РџРѕРґС‚РІРµСЂР¶РґРµРЅРёРµ СѓРґР°Р»РµРЅРёСЏ
+        cout << "Р’С‹ РўРћР§РќРћ С…РѕС‚РёС‚Рµ СѓРґР°Р»РёС‚СЊ СЌС‚РѕРіРѕ СЃРѕС‚СЂСѓРґРЅРёРєР°?\n1 - Р”Р°\n0 - РќРµС‚\n";
         char choice;
         cin >> choice;
         clearInputBuffer();
@@ -267,7 +283,7 @@ void Delete_Employee() {
             return;
         }
 
-        // Удаление из базы данных
+        // РЈРґР°Р»РµРЅРёРµ РёР· Р±Р°Р·С‹ РґР°РЅРЅС‹С…
         PreparedStatement* deleteStmt = con->prepareStatement(
             "DELETE FROM employees WHERE id = ?"
         );
@@ -276,18 +292,18 @@ void Delete_Employee() {
         int affected_rows = deleteStmt->executeUpdate();
 
         if (affected_rows > 0) {
-            cout << "Сотрудник успешно удален. Введите Enter для продолжения...\n";
+            cout << "РЎРѕС‚СЂСѓРґРЅРёРє СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             cin.get();
             system("cls");
 
         }
         else {
-            cout << "Не удалось удалить сотрудника. Введите Enter для продолжения...\n";
+            cout << "РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ СЃРѕС‚СЂСѓРґРЅРёРєР°. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             cin.get();
             system("cls");
         }
 
-        // Освобождение ресурсов
+        // РћСЃРІРѕР±РѕР¶РґРµРЅРёРµ СЂРµСЃСѓСЂСЃРѕРІ
         delete deleteStmt;
         delete result;
         delete checkStmt;
@@ -296,18 +312,18 @@ void Delete_Employee() {
 
     }
     catch (SQLException& e) {
-        cerr << "Ошибка SQL при удалении сотрудника: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР° SQL РїСЂРё СѓРґР°Р»РµРЅРёРё СЃРѕС‚СЂСѓРґРЅРёРєР°: " << e.what() << endl;
         cin.get();
         system("cls");
     }
     catch (const exception& e) {
-        cerr << "Ошибка: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР°: " << e.what() << endl;
         cin.get();
         system("cls");
     }
 }
 
-//Фильтр рабочих(по трем полям + по трем операторам, итого - 9 вариаций)
+//Р¤РёР»СЊС‚СЂ СЂР°Р±РѕС‡РёС…(РїРѕ С‚СЂРµРј РїРѕР»СЏРј + РїРѕ С‚СЂРµРј РѕРїРµСЂР°С‚РѕСЂР°Рј, РёС‚РѕРіРѕ - 9 РІР°СЂРёР°С†РёР№)
 void Filter_Employee() {
     try {
         Database db;
@@ -315,27 +331,27 @@ void Filter_Employee() {
         string a = "-1", b = "-1";
         char t, s;
 
-        // Выбор поля для фильтрации
-        cout << "Фильтр по:\n";
+        // Р’С‹Р±РѕСЂ РїРѕР»СЏ РґР»СЏ С„РёР»СЊС‚СЂР°С†РёРё
+        cout << "Р¤РёР»СЊС‚СЂ РїРѕ:\n";
         cout << "1 - ID\n";
-        cout << "2 - Возрасту\n";
-        cout << "3 - Зарплате\n";
+        cout << "2 - Р’РѕР·СЂР°СЃС‚Сѓ\n";
+        cout << "3 - Р—Р°СЂРїР»Р°С‚Рµ\n";
         cin >> t;
         clearInputBuffer();
 
         if (t < '1' || t > '3') {
-            cout << "Некорректный ввод. Введите Enter для продолжения...\n";
+            cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             cin.get();
             system("cls");
             return;
         }
 
-        // Выбор оператора
-        cout << "> - больше\n< - меньше\n# - в пределах\n";
+        // Р’С‹Р±РѕСЂ РѕРїРµСЂР°С‚РѕСЂР°
+        cout << "> - Р±РѕР»СЊС€Рµ\n< - РјРµРЅСЊС€Рµ\n# - РІ РїСЂРµРґРµР»Р°С…\n";
         cin >> s;
         clearInputBuffer();
 
-        // Определение имени поля для SQL-запроса
+        // РћРїСЂРµРґРµР»РµРЅРёРµ РёРјРµРЅРё РїРѕР»СЏ РґР»СЏ SQL-Р·Р°РїСЂРѕСЃР°
         string field_name;
         switch (t) {
         case '1': field_name = "id"; break;
@@ -343,17 +359,17 @@ void Filter_Employee() {
         case '3': field_name = "salary"; break;
         }
 
-        // Формирование условия запроса
+        // Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ СѓСЃР»РѕРІРёСЏ Р·Р°РїСЂРѕСЃР°
         string where_clause;
         vector<double> params;
 
         switch (s) {
         case '>':
-            cout << "Введите минимальное значение: ";
+            cout << "Р’РІРµРґРёС‚Рµ РјРёРЅРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ: ";
             cin >> a;
             clearInputBuffer();
             if (prov(a) < 1) {
-                cout << "Некорректный ввод. Введите Enter для продолжения...\n";
+                cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
                 cin.get();
                 system("cls");
                 return;
@@ -363,11 +379,11 @@ void Filter_Employee() {
             break;
 
         case '<':
-            cout << "Введите максимальное значение: ";
+            cout << "Р’РІРµРґРёС‚Рµ РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ: ";
             cin >> b;
             clearInputBuffer();
             if (prov(b) < 1) {
-                cout << "Некорректный ввод. Введите Enter для продолжения...\n";
+                cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
                 cin.get();
                 system("cls");
                 return;
@@ -377,14 +393,14 @@ void Filter_Employee() {
             break;
 
         case '#':
-            cout << "Введите минимальное значение: ";
+            cout << "Р’РІРµРґРёС‚Рµ РјРёРЅРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ: ";
             cin >> a;
             clearInputBuffer();
-            cout << "Введите максимальное значение: ";
+            cout << "Р’РІРµРґРёС‚Рµ РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ: ";
             cin >> b;
             clearInputBuffer();
             if (prov(a) < 1 || prov(b) < 1) {
-                cout << "Некорректный ввод. Введите Enter для продолжения...\n";
+                cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
                 cin.get();
                 system("cls");
                 return;
@@ -395,25 +411,25 @@ void Filter_Employee() {
             break;
 
         default:
-            cout << "Некорректный ввод. Введите Enter для продолжения...\n";
+            cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             cin.get();
             system("cls");
             return;
         }
 
-        // Формирование SQL-запроса
+        // Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ SQL-Р·Р°РїСЂРѕСЃР°
         string sql = "SELECT * FROM employees WHERE " + where_clause;
         PreparedStatement* pstmt = con->prepareStatement(sql);
 
-        // Подстановка параметров
+        // РџРѕРґСЃС‚Р°РЅРѕРІРєР° РїР°СЂР°РјРµС‚СЂРѕРІ
         for (size_t i = 0; i < params.size(); ++i) {
             pstmt->setDouble(i + 1, params[i]);
         }
 
-        // Выполнение запроса
+        // Р’С‹РїРѕР»РЅРµРЅРёРµ Р·Р°РїСЂРѕСЃР°
         ResultSet* res = pstmt->executeQuery();
 
-        // Вывод результатов
+        // Р’С‹РІРѕРґ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
         PrintEmployeeHeader();
         bool found = false;
 
@@ -430,10 +446,10 @@ void Filter_Employee() {
         }
 
         if (!found) {
-            cout << "Сотрудники не найдены. Введите Enter для продолжения...\n";
+            cout << "РЎРѕС‚СЂСѓРґРЅРёРєРё РЅРµ РЅР°Р№РґРµРЅС‹. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
         }
 
-        // Очистка ресурсов
+        // РћС‡РёСЃС‚РєР° СЂРµСЃСѓСЂСЃРѕРІ
         delete res;
         delete pstmt;
 
@@ -442,18 +458,18 @@ void Filter_Employee() {
 
     }
     catch (SQLException& e) {
-        cerr << "Ошибка SQL при фильтрации: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР° SQL РїСЂРё С„РёР»СЊС‚СЂР°С†РёРё: " << e.what() << endl;
         cin.get();
         system("cls");
     }
     catch (const exception& e) {
-        cerr << "Ошибка: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР°: " << e.what() << endl;
         cin.get();
         system("cls");
     }
 }
 
-//Поиск рабочего
+//РџРѕРёСЃРє СЂР°Р±РѕС‡РµРіРѕ
 void Search_Employee() {
     try {
         Database db;
@@ -461,39 +477,39 @@ void Search_Employee() {
         char t;
         string s;
 
-        // Выбор критерия поиска
-        cout << "Поиск по:\n"
+        // Р’С‹Р±РѕСЂ РєСЂРёС‚РµСЂРёСЏ РїРѕРёСЃРєР°
+        cout << "РџРѕРёСЃРє РїРѕ:\n"
             << "1 - ID\n"
-            << "2 - ФИО\n"
-            << "3 - Возрасту\n"
-            << "4 - Должности\n"
-            << "5 - Зарплате\n";
+            << "2 - Р¤РРћ\n"
+            << "3 - Р’РѕР·СЂР°СЃС‚Сѓ\n"
+            << "4 - Р”РѕР»Р¶РЅРѕСЃС‚Рё\n"
+            << "5 - Р—Р°СЂРїР»Р°С‚Рµ\n";
         cin >> t;
         clearInputBuffer();
 
         if (t < '1' || t > '5') {
-            cout << "Некорректный ввод. Введите Enter для продолжения...\n";
+            cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             cin.get();
             system("cls");
             return;
         }
 
-        // Ввод значения для поиска
-        cout << "\nВведите значение для поиска:\n";
+        // Р’РІРѕРґ Р·РЅР°С‡РµРЅРёСЏ РґР»СЏ РїРѕРёСЃРєР°
+        cout << "\nР’РІРµРґРёС‚Рµ Р·РЅР°С‡РµРЅРёРµ РґР»СЏ РїРѕРёСЃРєР°:\n";
         cin >> s;
         clearInputBuffer();
 
-        // Валидация числовых полей
+        // Р’Р°Р»РёРґР°С†РёСЏ С‡РёСЃР»РѕРІС‹С… РїРѕР»РµР№
         if (t == '1' || t == '3' || t == '5') {
             if (prov(s) != (t == '5' ? 2 : 1)) {
-                cout << "Некорректный ввод. Введите Enter для продолжения...\n";
+                cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
                 cin.get();
                 system("cls");
                 return;
             }
         }
 
-        // Формирование SQL-запроса
+        // Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ SQL-Р·Р°РїСЂРѕСЃР°
         string field_name;
         string sql;
         unique_ptr<PreparedStatement> pstmt;
@@ -530,10 +546,10 @@ void Search_Employee() {
             break;
         }
 
-        // Выполнение запроса
+        // Р’С‹РїРѕР»РЅРµРЅРёРµ Р·Р°РїСЂРѕСЃР°
         unique_ptr<ResultSet> res(pstmt->executeQuery());
 
-        // Вывод результатов
+        // Р’С‹РІРѕРґ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
         PrintEmployeeHeader();
         bool found = false;
 
@@ -550,7 +566,7 @@ void Search_Employee() {
         }
 
         if (!found) {
-            cout << "Сотрудник не найден. Введите Enter для продолжения...\n";
+            cout << "РЎРѕС‚СЂСѓРґРЅРёРє РЅРµ РЅР°Р№РґРµРЅ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
         }
 
         cin.get();
@@ -558,47 +574,47 @@ void Search_Employee() {
 
     }
     catch (SQLException& e) {
-        cerr << "Ошибка SQL при поиске: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР° SQL РїСЂРё РїРѕРёСЃРєРµ: " << e.what() << endl;
         cin.get();
         system("cls");
     }
     catch (const exception& e) {
-        cerr << "Ошибка: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР°: " << e.what() << endl;
         cin.get();
         system("cls");
     }
 }
 
-//Сортировка рабочих(по пяти полям + по возрастанию и убыванию, итого - 10 вариаций)
+//РЎРѕСЂС‚РёСЂРѕРІРєР° СЂР°Р±РѕС‡РёС…(РїРѕ РїСЏС‚Рё РїРѕР»СЏРј + РїРѕ РІРѕР·СЂР°СЃС‚Р°РЅРёСЋ Рё СѓР±С‹РІР°РЅРёСЋ, РёС‚РѕРіРѕ - 10 РІР°СЂРёР°С†РёР№)
 void Sort_Employee() {
     try {
         Database db;
         Connection* con = db.getConnection();
         char x, t;
 
-        // Выбор направления сортировки
-        cout << "Сортировка по возрастанию(>) или по убыванию(<)?\n";
+        // Р’С‹Р±РѕСЂ РЅР°РїСЂР°РІР»РµРЅРёСЏ СЃРѕСЂС‚РёСЂРѕРІРєРё
+        cout << "РЎРѕСЂС‚РёСЂРѕРІРєР° РїРѕ РІРѕР·СЂР°СЃС‚Р°РЅРёСЋ(>) РёР»Рё РїРѕ СѓР±С‹РІР°РЅРёСЋ(<)?\n";
         cin >> x;
         clearInputBuffer();
 
         if (x != '>' && x != '<') {
-            cout << "Некорректный ввод. Введите Enter для продолжения...\n";
+            cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             cin.get();
             system("cls");
             return;
         }
 
-        // Выбор поля для сортировки
-        cout << "Сортировка по:\n";
+        // Р’С‹Р±РѕСЂ РїРѕР»СЏ РґР»СЏ СЃРѕСЂС‚РёСЂРѕРІРєРё
+        cout << "РЎРѕСЂС‚РёСЂРѕРІРєР° РїРѕ:\n";
         cout << "1 - ID\n";
-        cout << "2 - ФИО\n";
-        cout << "3 - Возрасту\n";
-        cout << "4 - Зарплате\n";
-        cout << "5 - Должности\n";
+        cout << "2 - Р¤РРћ\n";
+        cout << "3 - Р’РѕР·СЂР°СЃС‚Сѓ\n";
+        cout << "4 - Р—Р°СЂРїР»Р°С‚Рµ\n";
+        cout << "5 - Р”РѕР»Р¶РЅРѕСЃС‚Рё\n";
         cin >> t;
         clearInputBuffer();
 
-        // Определение параметров сортировки
+        // РћРїСЂРµРґРµР»РµРЅРёРµ РїР°СЂР°РјРµС‚СЂРѕРІ СЃРѕСЂС‚РёСЂРѕРІРєРё
         string field_name;
         string order_direction = (x == '>') ? "ASC" : "DESC";
 
@@ -609,18 +625,18 @@ void Sort_Employee() {
         case '4': field_name = "salary"; break;
         case '5': field_name = "position"; break;
         default:
-            cout << "Некорректный ввод. Введите Enter для продолжения...\n";
+            cout << "РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
             cin.get();
             system("cls");
             return;
         }
 
-        // Формирование SQL-запроса
+        // Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ SQL-Р·Р°РїСЂРѕСЃР°
         string sql = "SELECT * FROM employees ORDER BY " + field_name + " " + order_direction;
         Statement* stmt = con->createStatement();
         ResultSet* res = stmt->executeQuery(sql);
 
-        // Вывод отсортированных данных
+        // Р’С‹РІРѕРґ РѕС‚СЃРѕСЂС‚РёСЂРѕРІР°РЅРЅС‹С… РґР°РЅРЅС‹С…
         PrintEmployeeHeader();
         while (res->next()) {
             Employee emp{
@@ -633,42 +649,42 @@ void Sort_Employee() {
             PrintEmployeeRow(emp);
         }
 
-        // Очистка ресурсов
+        // РћС‡РёСЃС‚РєР° СЂРµСЃСѓСЂСЃРѕРІ
         delete res;
         delete stmt;
 
-        cout << "Сотрудники отсортированы. Введите Enter для продолжения...\n";
+        cout << "РЎРѕС‚СЂСѓРґРЅРёРєРё РѕС‚СЃРѕСЂС‚РёСЂРѕРІР°РЅС‹. Р’РІРµРґРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...\n";
         cin.get();
         system("cls");
 
     }
     catch (SQLException& e) {
-        cerr << "Ошибка SQL при сортировке: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР° SQL РїСЂРё СЃРѕСЂС‚РёСЂРѕРІРєРµ: " << e.what() << endl;
         cin.get();
         system("cls");
     }
     catch (const exception& e) {
-        cerr << "Ошибка: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР°: " << e.what() << endl;
         cin.get();
         system("cls");
     }
 }
 
-//Вывод всех рабочих 
+//Р’С‹РІРѕРґ РІСЃРµС… СЂР°Р±РѕС‡РёС… 
 void Read_Employee() {
     try {
         system("cls");
         Database db;
         Connection* con = db.getConnection();
 
-        // Создание и выполнение запроса
+        // РЎРѕР·РґР°РЅРёРµ Рё РІС‹РїРѕР»РЅРµРЅРёРµ Р·Р°РїСЂРѕСЃР°
         Statement* stmt = con->createStatement();
         ResultSet* res = stmt->executeQuery("SELECT * FROM employees");
 
         PrintEmployeeHeader();
         bool hasData = false;
 
-        // Вывод результатов
+        // Р’С‹РІРѕРґ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ
         while (res->next()) {
             hasData = true;
             Employee emp{
@@ -682,25 +698,25 @@ void Read_Employee() {
         }
 
         if (!hasData) {
-            cout << "Список сотрудников пуст\n";
+            cout << "РЎРїРёСЃРѕРє СЃРѕС‚СЂСѓРґРЅРёРєРѕРІ РїСѓСЃС‚\n";
         }
 
-        // Освобождение ресурсов
+        // РћСЃРІРѕР±РѕР¶РґРµРЅРёРµ СЂРµСЃСѓСЂСЃРѕРІ
         delete res;
         delete stmt;
 
-        cout << "\nНажмите Enter для продолжения...";
+        cout << "\nРќР°Р¶РјРёС‚Рµ Enter РґР»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ...";
         cin.get();
         system("cls");
 
     }
     catch (SQLException& e) {
-        cerr << "Ошибка чтения данных: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР° С‡С‚РµРЅРёСЏ РґР°РЅРЅС‹С…: " << e.what() << endl;
         cin.get();
         system("cls");
     }
     catch (const exception& e) {
-        cerr << "Ошибка: " << e.what() << endl;
+        cerr << "РћС€РёР±РєР°: " << e.what() << endl;
         cin.get();
         system("cls");
     }

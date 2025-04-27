@@ -10,7 +10,7 @@ Database::Database() {
     driver = sql::mysql::get_mysql_driver_instance();
     con = driver->connect("tcp://127.0.0.1:3306", "root", "root");
     con->setSchema("employee_db");
-    con->createStatement()->execute("SET NAMES utf8mb4");
+    con->createStatement()->execute("SET NAMES 'utf8mb4'");
 }
 
 Database::~Database() {
